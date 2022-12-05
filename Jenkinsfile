@@ -1,3 +1,4 @@
+
 pipeline {
 
     agent any
@@ -10,33 +11,29 @@ pipeline {
                 sh "mvn --batch-mode package" 
             }
         }
-	
-	stage('Code Quality') {
-                   steps {
-                       script {
-                          def scannerHome = tool 'sonarqube';
-                          withSonarQubeEnv("sonarqube") {
-                          sh "${tool("sonarqube")}/bin/sonar-scanner"
-                                       }
-                               }
-                           }
-                        }
-	
-       stage('Archive Unit Tests Results') {
+        stage('Archive Unit Tests Results') {
             steps {
                 echo 'Archive Unit Test Results'
-               step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/TEST-*.xml'])
+                step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/TEST-*.xml'])
             }
         }
-        
+
         stage('Publish Unit Test results report') {
             steps {
                 echo 'Report'
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: false, reportDir: 'target/site/jacoco/', reportFiles: 'index.html', reportName: 'jacaco report', reportTitles: ''])
-
-             }
+            }
         }
-        
+        stage('Code Quality') {
+            steps {
+                script {
+                    def scannerHome = tool 'sonarqube';
+                    withSonarQubeEnv("sonarqube") {
+                    sh "${tool("sonarqube")}/bin/sonar-scanner"
+                    }
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 echo 'Deploy'
@@ -46,7 +43,7 @@ pipeline {
                         if [ "$runName" != "" ]
                         then
                             docker stop $runName
-                        fi
+   
                     done
                     docker build -t alpine-petclinic -f Dockerfile.deploy .
                     docker run --name alpine-petclinic --rm -d -p 9966:8080 alpine-petclinic 
@@ -55,3 +52,5 @@ pipeline {
         }
     }
 }
+Footer
+© 2022 GitHub, Inc. 
