@@ -10,7 +10,17 @@ pipeline {
                 sh "mvn --batch-mode package" 
             }
         }
-	
+	    
+	stage('Code Quality') {
+                   steps {
+                       script {
+                          def scannerHome = tool 'sonarqube';
+                          withSonarQubeEnv("sonarqube") {
+                          sh "${tool("sonarqube")}/bin/sonar-scanner"
+                                       }
+                               }
+                           }
+                        }
 	
        stage('Archive Unit Tests Results') {
             steps {
@@ -26,17 +36,6 @@ pipeline {
 
              }
         }
-	    
-	stage('Code Quality') {
-                   steps {
-                       script {
-                          def scannerHome = tool 'sonarqube';
-                          withSonarQubeEnv("sonarqube") {
-                          sh "${tool("sonarqube")}/bin/sonar-scanner"
-                                       }
-                               }
-                           }
-                        }
         
         stage('Deploy') {
             steps {
